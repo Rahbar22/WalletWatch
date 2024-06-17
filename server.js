@@ -5,6 +5,8 @@ const dotenv = require('dotenv')
 const color = require('colors')
 const app = express()
 const connectDB = require('./config/db')
+const userRoutes = require('./routes/userRoutes')
+const transactionRoutes = require('./routes/transactionRoutes')
 
 dotenv.config()
 connectDB()
@@ -13,9 +15,8 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(cors())
 
-app.get('/', (req, res) => {
-    res.send("Welcome");
-})
+app.use('/api/users', userRoutes);
+app.use('/api/transaction', transactionRoutes)
 
 const PORT = process.env.PORT || 5000;
 
