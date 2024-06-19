@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/register.css'
-import { ToastContainer, toast } from 'react-toastify'
+import { message } from 'antd'
 import 'react-toastify/dist/ReactToastify.css'
 import axios from 'axios'
 import Spinner from '../components/Spinner'
@@ -23,15 +23,13 @@ const RegisterPage = () => {
             setLoading(true);
             const {data} = await axios.post('/api/users/register', {name, email, password});
             console.log(data)
+            message.success("Registeration Successfull");
             setLoading(false);
             navigate('/login');
         }
         catch(error){
             setLoading(false);
-            toast.error("Error Notification !", {
-                position: 'top-right',
-                autoClose: 5000,
-            });
+            message.error("Something went wrong");
         }
     }
 

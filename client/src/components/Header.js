@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { message } from 'antd';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Header = () => {
 
   const logoutHandler = () => {
     localStorage.removeItem('user')
+    message.success("Logout Successfully");
     navigate('/login')
   }
 

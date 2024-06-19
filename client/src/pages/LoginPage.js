@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/login.css'
+import { message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../components/Spinner'
 import axios from 'axios'
@@ -23,10 +24,12 @@ const LoginPage = () => {
                 "user",
                 JSON.stringify(data)
               );
+              message.success("Login success");
             setLoading(false);
             navigate('/');
         }
         catch(error){
+            message.error("Something went wrong");
             setLoading(false);
         }
     }

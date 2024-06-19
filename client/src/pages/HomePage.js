@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import Layout from '../components/Layout'
-import {Form, Input, Modal, Select, Table, DatePicker} from 'antd'
+import {Form, Input, Modal, Select, Table, DatePicker, message} from 'antd'
 import {UnorderedListOutlined, AreaChartOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons'
 import axios from 'axios'
 import Spinner from '../components/Spinner'
@@ -16,6 +16,7 @@ const HomePage = () => {
   const [selectedDate, setSelectedate] = useState([]);
   const [type, setType] = useState('all');
   const [viewData, setViewData] = useState('table');
+  const [editable, setEditable] = useState(null);
 
   const columns = [
     {
@@ -41,6 +42,12 @@ const HomePage = () => {
     },
     {
       title:'Actions',
+      render:(text,record)=>(
+        <div>
+          <EditOutlined onClick={() => {setEditable(record); setShowModal(true);}}></EditOutlined>
+          <DeleteOutlined className='mx-2' onClick={() => handleDelete(record)}></DeleteOutlined>
+        </div>
+      )
     },
   ];
 
@@ -56,6 +63,7 @@ const HomePage = () => {
       }
       catch(error){
         console.log(error);
+        message.error("Fetch Issue With Tranction");
       }
     };
     getAllTransaction();
@@ -65,14 +73,44 @@ const HomePage = () => {
     try{
       const user = JSON.parse(localStorage.getItem('user'));
       setLoading(true);
-      const {data} = await axios.post('/api/transaction/addtransaction',{...values, userid:user._id});
-      console.log(data)
+
+      if(editable){
+        await axios.post('/api/transaction/edittransaction', {
+          payload:{
+            ...values,
+            userid:user._id,
+          },
+          transactionId:editable._id
+        })
+        message.success("Transaction Updated Successfully");
+      }
+      else{
+        await axios.post('/api/transaction/addtransaction',{...values, userid:user._id});
+        message.success("Transaction Added Successfully");
+      }
       setLoading(false);
       setShowModal(false);
+      setEditable(null);
     }
     catch(error){
       setLoading(false);
       console.log(error)
+    }
+  }
+
+  const handleDelete = async(record) => {
+    try{
+      setLoading(true);
+      await axios.post('/api/transaction/deletetransaction',{
+        transactionId:record._id,
+      })
+      message.success("Transaction Deleted!");
+      setLoading(false);
+    }
+    catch(error){
+      setLoading(false);
+      message.error("Unable to delete");
+      console.log(error);
     }
   }
 
@@ -122,8 +160,8 @@ const HomePage = () => {
           )
         }
       </div>
-      <Modal title='Add Transaction' open={showModal} onCancel={() => setShowModal(false)} footer={false}>
-          <Form layout='vertical' onFinish={handleSubmit}>
+      <Modal title={editable?'Edit Transaction':'Add Transaction'} open={showModal} onCancel={() => setShowModal(false)} footer={false}>
+          <Form layout='vertical' onFinish={handleSubmit} initialValues={editable}>
               <Form.Item label="Amount" name="amount">
                   <Input type='text' required/>
               </Form.Item>
